@@ -11,7 +11,7 @@ public class ApiResponse<T> implements Serializable {
 
 	private HttpStatus status;
 	private String message;
-	private Date timeStamp;
+	private Date timestamp;
 	private T result;
 
 	public ApiResponse() {
@@ -24,7 +24,7 @@ public class ApiResponse<T> implements Serializable {
 
 	public ApiResponse(HttpStatus status, String message, T result) {
 		super();
-		this.timeStamp = new Date();
+		this.timestamp = new Date();
 		this.status = status;
 		this.message = message;
 		this.result = result;
@@ -54,12 +54,12 @@ public class ApiResponse<T> implements Serializable {
 		this.result = result;
 	}
 
-	public Date getTimeStamp() {
-		return timeStamp;
+	public Date getTimestamp() {
+		return timestamp;
 	}
 
-	public void setTimeStamp(Date timeStamp) {
-		this.timeStamp = timeStamp;
+	public void setTimestamp(Date timestamp) {
+		this.timestamp = timestamp;
 	}
 
 }
