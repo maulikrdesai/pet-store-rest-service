@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-reverse-engineering PUBLIC "-//Hibernate/Hibernate Reverse Engineering DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-reverse-engineering-3.0.dtd" >
+
+<hibernate-reverse-engineering>
+	<type-mapping>
+		<sql-type jdbc-type="TIMESTAMP" hibernate-type="java.util.Date"/>
+		<sql-type jdbc-type="INTEGER" hibernate-type="java.lang.Integer"/>
+		<sql-type jdbc-type="BIGINT" hibernate-type="long"/>
+	</type-mapping>
+	<table name="categories" catalog="petstore" class="com.petstore.dao.entities.CategoryEntity">
+		<primary-key>
+			<generator class="identity"></generator>
+		</primary-key>
+	</table>	
+	<table name="tags" catalog="petstore" class="com.petstore.dao.entities.TagEntity">
+		<primary-key>
+			<generator class="assigned"></generator>
+		</primary-key>
+	</table>
+	<table name="pets" catalog="petstore" class="com.petstore.dao.entities.PetEntity">
+		<primary-key>
+			<generator class="identity"></generator>
+		</primary-key>
+	</table>
+	<table name="pettags" catalog="petstore" class="com.petstore.dao.entities.PetTagEntity">
+		<primary-key>
+			<generator class="identity"></generator>
+		</primary-key>
+	</table>
+	<table name="petphotos" catalog="petstore" class="com.petstore.dao.entities.PetPhotosEntity">
+		<primary-key>
+			<generator class="identity"></generator>
+		</primary-key>
+	</table>
+</hibernate-reverse-engineering>

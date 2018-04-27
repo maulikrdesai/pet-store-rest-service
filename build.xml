@@ -1,0 +1,62 @@
+<project xmlns:artifact="antlib:org.apache.maven.artifact.ant" name="svr-dao" basedir="." default="reverse-engineer">
+	<property name="dest_dir" value="src/main/java"/>
+	<target name="reverse-engineer">
+		
+		<echo>Compiling reverse-engineer source</echo>
+		<javac srcdir="reverse-engineering/java" destdir="target/classes">
+			<classpath>
+				<fileset dir="reverse-engineering/ant-lib">
+					<include name="**/*.jar" />
+				</fileset>
+			</classpath>
+		</javac>
+
+		<echo>Setingup reverse-engineer classpath</echo>
+		<taskdef name="hibernatetool" classname="org.hibernate.tool.ant.HibernateToolTask">
+			<classpath>
+				<fileset dir="reverse-engineering/ant-lib">
+					<include name="**/*.jar" />
+				</fileset>
+			</classpath>
+			<classpath path="target/classes" />
+		</taskdef>
+		
+		<echo>Reverse engineer abstract classes</echo>
+		<hibernatetool destdir="${dest_dir}" templatepath="reverse-engineering/templates-custom">
+			<jdbcconfiguration 
+				propertyfile="reverse-engineering/hibernate.properties" 
+				revengfile="reverse-engineering/hibernate.reveng.xml" 
+				reversestrategy="com.petstore.reverse.engineer.AbstractEntityStrategy" 
+				detectManytoMany="true" 
+				detectOptimisticLock="false" />
+			<hbm2java ejb3="true" jdk5="true" />
+		</hibernatetool>
+
+		<echo>Reverse engineer concrete classes [If already not existing]</echo>
+		<hibernatetool destdir="${dest_dir}" templatepath="reverse-engineering/templates-custom">
+			<jdbcconfiguration 
+				propertyfile="reverse-engineering/hibernate.properties" 
+				revengfile="reverse-engineering/hibernate.reveng.xml" 
+				reversestrategy="com.petstore.reverse.engineer.ConcreteEntityStrategy" 
+				detectManytoMany="true" 
+				detectOptimisticLock="false" />
+			<hbm2java ejb3="true" jdk5="true" />
+		</hibernatetool>
+
+		<echo>Compiling reverse engineered source</echo>
+		<exec executable="mvn.cmd">
+			<arg value="clean" />
+			<arg value="install" />
+			<arg value="-Dmaven.test.skip=true" />
+		</exec>
+
+		<echo>Remove Catalog Entries from Reverse-Envineered files</echo>
+		<replaceregexp byline="true">
+			<regexp pattern=",\s*catalog[^,\)]+" />
+			<substitution expression="" />
+			<fileset dir="${dest_dir}">
+				<include name="**/*.java" />
+			</fileset>
+		</replaceregexp>
+	</target>
+</project>
