@@ -2,27 +2,29 @@ package com.petstore;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 @EnableWebMvc
 @SpringBootApplication
+@CrossOrigin
 public class Application {
+
+	public static final ObjectMapper objectMapper = new ObjectMapper();
+	static {
+		objectMapper.setSerializationInclusion(Include.NON_NULL);
+		objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+		objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+	}
 
 	public static void main(String[] args) {
 		SpringApplication.run(Application.class, args);
 	}
 
-	@Bean
-	public MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter() {
-		MappingJackson2HttpMessageConverter jsonConverter = new MappingJackson2HttpMessageConverter();
-		ObjectMapper objectMapper = new ObjectMapper();
-		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-		jsonConverter.setObjectMapper(objectMapper);
-		return jsonConverter;
-	}
+	
 }

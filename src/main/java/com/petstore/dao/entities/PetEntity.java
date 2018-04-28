@@ -29,8 +29,7 @@ public class PetEntity extends com.petstore.dao.entities.AbstractPetEntity imple
 		super(petName);
 	}
 
-	public PetEntity(CategoryEntity categoryEntity, String petName, Set<PetPhotosEntity> petPhotosEntities,
-			Set<TagEntity> tagEntities) {
+	public PetEntity(CategoryEntity categoryEntity, String petName, Set<PetPhotosEntity> petPhotosEntities, Set<TagEntity> tagEntities) {
 		super(categoryEntity, petName, petPhotosEntities, tagEntities);
 	}
 
@@ -53,7 +52,7 @@ public class PetEntity extends com.petstore.dao.entities.AbstractPetEntity imple
 
 	@Transient
 	public List<String> getPhotoUrls() {
-		return super.getPetPhotosEntities().stream().map(pp -> pp.getPhotoUrl()).filter(s -> StringUtils.isEmpty(s))
-				.sorted().collect(Collectors.toList());
+		return super.getPetPhotosEntities().stream().map(pp -> pp.getPhotoUrl()).filter(s -> StringUtils.isEmpty(s)).sorted()
+				.collect(Collectors.toList());
 	}
 }

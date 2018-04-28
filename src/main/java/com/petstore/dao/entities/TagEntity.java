@@ -26,7 +26,7 @@ public class TagEntity extends com.petstore.dao.entities.AbstractTagEntity imple
 		super(tagId, tagName, petEntities);
 	}
 
-	public static int compareByName(TagEntity t1,TagEntity t2) {
+	public static int compareByName(TagEntity t1, TagEntity t2) {
 		return t1.getTagName().compareTo(t2.getTagName());
 	}
 }
