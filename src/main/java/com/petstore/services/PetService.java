@@ -5,8 +5,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
-import javax.validation.Valid;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -54,7 +52,7 @@ public class PetService {
 		return petRepo.save(newPetEntity);
 	}
 
-	public PetEntity update(Long petId,Pet petUpdate) {
+	public PetEntity update(Long petId, Pet petUpdate) {
 		Optional<PetEntity> optionalPet = petRepo.findById(petId);
 		if (!optionalPet.isPresent())
 			throw new IllegalArgumentException(
@@ -80,17 +78,18 @@ public class PetService {
 		petEntity.setCategoryEntity(categoryEntity);
 
 		// Resolve Tags
-		petEntity.setTagEntities(new HashSet<>());
-		for (Tag tag : petUpdate.getTags()) {
-			TagEntity tagEntity = null;
-			if (petUpdate.getCategory() != null && petUpdate.getCategory().getId() > 0) {
-				Optional<TagEntity> optionalTag = tagRepo.findById(tag.getId());
-				if (!optionalTag.isPresent())
-					tagEntity = new TagEntity(0, tag.getName());
+		if (petUpdate.getTags() != null) {
+			petEntity.setTagEntities(new HashSet<>());
+			for (Tag tag : petUpdate.getTags()) {
+				TagEntity tagEntity = null;
+				if (petUpdate.getCategory() != null && petUpdate.getCategory().getId() > 0) {
+					Optional<TagEntity> optionalTag = tagRepo.findById(tag.getId());
+					if (!optionalTag.isPresent())
+						tagEntity = new TagEntity(0, tag.getName());
+				}
+				petEntity.getTagEntities().add(tagEntity);
 			}
-			petEntity.getTagEntities().add(tagEntity);
 		}
-
 		// Resolve PhotoUrls
 		petEntity.setPetPhotosEntities(new HashSet<>());
 		for (String photoUrl : petUpdate.getPhotoUrls())
