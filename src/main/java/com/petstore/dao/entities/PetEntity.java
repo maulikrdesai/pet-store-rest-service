@@ -52,7 +52,7 @@ public class PetEntity extends com.petstore.dao.entities.AbstractPetEntity imple
 
 	@Transient
 	public List<String> getPhotoUrls() {
-		return super.getPetPhotosEntities().stream().map(pp -> pp.getPhotoUrl()).filter(s -> StringUtils.isEmpty(s)).sorted()
+		return super.getPetPhotosEntities().stream().map(pp -> pp.getPhotoUrl()).filter(s -> !StringUtils.isEmpty(s)).sorted()
 				.collect(Collectors.toList());
 	}
 }
