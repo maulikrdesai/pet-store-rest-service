@@ -29,19 +29,23 @@ public abstract class AbstractPetEntity extends com.petstore.dao.AbstractBaseEnt
 	private long petId;
 	private CategoryEntity categoryEntity;
 	private String petName;
+	private String status;
 	private Set<PetPhotosEntity> petPhotosEntities = new HashSet<PetPhotosEntity>(0);
 	private Set<TagEntity> tagEntities = new HashSet<TagEntity>(0);
 
 	public AbstractPetEntity() {
 	}
 
-	public AbstractPetEntity(String petName) {
+	public AbstractPetEntity(String petName, String status) {
 		this.petName = petName;
+		this.status = status;
 	}
 
-	public AbstractPetEntity(CategoryEntity categoryEntity, String petName, Set<PetPhotosEntity> petPhotosEntities, Set<TagEntity> tagEntities) {
+	public AbstractPetEntity(CategoryEntity categoryEntity, String petName, String status, Set<PetPhotosEntity> petPhotosEntities,
+			Set<TagEntity> tagEntities) {
 		this.categoryEntity = categoryEntity;
 		this.petName = petName;
+		this.status = status;
 		this.petPhotosEntities = petPhotosEntities;
 		this.tagEntities = tagEntities;
 	}
@@ -77,6 +81,15 @@ public abstract class AbstractPetEntity extends com.petstore.dao.AbstractBaseEnt
 
 	public void setPetName(String petName) {
 		this.petName = petName;
+	}
+
+	@Column(name = "status", nullable = false, length = 50)
+	public String getStatus() {
+		return this.status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
 	}
 
 	@JsonIgnore

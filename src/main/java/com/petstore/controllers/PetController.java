@@ -18,6 +18,7 @@ import org.springframework.web.client.HttpClientErrorException;
 
 import com.petstore.dao.entities.CategoryEntity;
 import com.petstore.dao.entities.PetEntity;
+import com.petstore.dao.entities.PetEntity.PetStatus;
 import com.petstore.dao.repository.CategoryRepository;
 import com.petstore.dao.repository.PetRepository;
 import com.petstore.models.ApiResponse;
@@ -73,7 +74,7 @@ public class PetController {
 								newPet.getCategory().getId(), newPet.getCategory().getName()));
 		}
 
-		PetEntity newPetEntity = new PetEntity(newPet.getName());
+		PetEntity newPetEntity = new PetEntity(newPet.getName(), PetStatus.resolveStatus(newPet.getStatus()));
 		newPetEntity.setCategoryEntity(categoryEntity);
 		petRepo.save(newPetEntity);
 		return new ApiResponse<Void>(HttpStatus.OK, MessageFormat.format(

@@ -15,6 +15,7 @@ CREATE TABLE `pets` (
   `pet_id` BIGINT(20) NOT NULL AUTO_INCREMENT
   ,`pet_name` VARCHAR(500) NOT NULL
   ,`category_id` BIGINT(20)
+  ,`status` VARCHAR(50) NOT NULL DEFAULT 'available'
   ,PRIMARY KEY (`pet_id`)
   ,KEY `FK_petsCategory` (`category_id`)
   ,CONSTRAINT `FK_petsCategory` FOREIGN KEY (`category_id`) REFERENCES `categories` (`category_id`)

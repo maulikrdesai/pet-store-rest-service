@@ -10,6 +10,7 @@ import javax.persistence.Transient;
 
 import org.springframework.util.StringUtils;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.petstore.models.Pet;
 
 /**
@@ -21,16 +22,28 @@ public class PetEntity extends com.petstore.dao.entities.AbstractPetEntity imple
 
 	private static final long serialVersionUID = 1L;
 
+	public static enum PetStatus {
+		AVAILABLE, PENDING, SOLD;
+
+		public static PetStatus resolveStatus(String status) {
+			PetStatus resolvedStatus = PetStatus.valueOf(status);
+			if (resolvedStatus != null)
+				return resolvedStatus;
+			return PetStatus.AVAILABLE;
+		}
+	}
+
 	public PetEntity() {
 		super();
 	}
 
-	public PetEntity(String petName) {
-		super(petName);
+	public PetEntity(String petName, PetStatus status) {
+		super(petName, status.name());
 	}
 
-	public PetEntity(CategoryEntity categoryEntity, String petName, Set<PetPhotosEntity> petPhotosEntities, Set<TagEntity> tagEntities) {
-		super(categoryEntity, petName, petPhotosEntities, tagEntities);
+	public PetEntity(CategoryEntity categoryEntity, String petName, PetStatus status, Set<PetPhotosEntity> petPhotosEntities,
+			Set<TagEntity> tagEntities) {
+		super(categoryEntity, petName, status.name(), petPhotosEntities, tagEntities);
 	}
 
 	public PetEntity(Pet newPet) {
@@ -54,5 +67,15 @@ public class PetEntity extends com.petstore.dao.entities.AbstractPetEntity imple
 	public List<String> getPhotoUrls() {
 		return super.getPetPhotosEntities().stream().map(pp -> pp.getPhotoUrl()).filter(s -> !StringUtils.isEmpty(s)).sorted()
 				.collect(Collectors.toList());
+	}
+
+	@Transient
+	@JsonIgnore
+	public PetStatus getPetStatus() {
+		return PetStatus.resolveStatus(super.getStatus());
+	}
+
+	public void setPetStatus(PetStatus petStatus) {
+		super.setStatus(petStatus.name());
 	}
 }
