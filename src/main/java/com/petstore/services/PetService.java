@@ -1,12 +1,15 @@
 package com.petstore.services;
 
 import java.text.MessageFormat;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.petstore.dao.entities.CategoryEntity;
 import com.petstore.dao.entities.PetEntity;
@@ -20,47 +23,53 @@ import com.petstore.models.Pet;
 import com.petstore.models.Tag;
 
 @Service
+@Transactional
 public class PetService {
 
-	@Autowired
-	PetRepository petRepo;
+	@PersistenceContext
+	EntityManager em;
 	@Autowired
 	CategoryRepository categoryRepo;
 	@Autowired
 	TagRepository tagRepo;
+	@Autowired
+	PetRepository petRepo;
 
 	public List<PetEntity> findAll() {
 		return petRepo.findAll();
 	}
 
-	public Optional<PetEntity> findById(long petId) {
-		return petRepo.findById(petId);
+	public PetEntity findById(long petId) {
+		return em.find(PetEntity.class, petId);
 	}
 
 	public void deleteById(long petId) {
-		petRepo.deleteById(petId);
+		PetEntity petEntity = em.find(PetEntity.class, petId);
+		if (petEntity == null)
+			throw new IllegalArgumentException(
+					MessageFormat.format("Pet with id {0} does not belong to the store", petId));
+		em.remove(petEntity);
 	}
 
 	public PetEntity save(Pet newPet) {
-		Optional<PetEntity> optionalPet = petRepo.findById(newPet.getId());
-		if (optionalPet.isPresent())
+		PetEntity newPetEntity = em.find(PetEntity.class, newPet.getId());
+		if (newPetEntity != null)
 			throw new IllegalArgumentException(
 					MessageFormat.format("Pet with id {0} already belong to the store", newPet.getId()));
 
-		PetEntity newPetEntity = new PetEntity(newPet.getName(), PetStatus.resolveStatus(newPet.getStatus()));
+		newPetEntity = em.merge(new PetEntity(newPet.getName(), PetStatus.resolveStatus(newPet.getStatus())));
 		dtoToEntity(newPet, newPetEntity);
-		return petRepo.save(newPetEntity);
+		return newPetEntity;
 	}
 
 	public PetEntity update(Long petId, Pet petUpdate) {
-		Optional<PetEntity> optionalPet = petRepo.findById(petId);
-		if (!optionalPet.isPresent())
+		PetEntity petEntity = em.find(PetEntity.class, petId);
+		if (petEntity == null)
 			throw new IllegalArgumentException(
 					MessageFormat.format("Pet with id {0} does not belong to the store", petUpdate.getId()));
 
-		PetEntity petEntity = optionalPet.get();
 		dtoToEntity(petUpdate, petEntity);
-		return petRepo.save(petEntity);
+		return petEntity;
 	}
 
 	public void dtoToEntity(Pet petUpdate, PetEntity petEntity) {
@@ -73,27 +82,30 @@ public class PetService {
 		if (petUpdate.getCategory() != null && petUpdate.getCategory().getId() > 0) {
 			Optional<CategoryEntity> optionalCategory = categoryRepo.findById(petUpdate.getCategory().getId());
 			if (!optionalCategory.isPresent())
-				categoryEntity = new CategoryEntity(petUpdate.getCategory().getName());
+				categoryEntity = em.merge(new CategoryEntity(petUpdate.getCategory().getName()));
 		}
 		petEntity.setCategoryEntity(categoryEntity);
 
-		// Resolve Tags
+		for (TagEntity tagEntity : petEntity.getTagEntities())
+			em.remove(tagEntity);
+		petEntity.getTagEntities().removeIf((p) -> true);
+
 		if (petUpdate.getTags() != null) {
-			petEntity.setTagEntities(new HashSet<>());
 			for (Tag tag : petUpdate.getTags()) {
 				TagEntity tagEntity = null;
 				if (petUpdate.getCategory() != null && petUpdate.getCategory().getId() > 0) {
 					Optional<TagEntity> optionalTag = tagRepo.findById(tag.getId());
 					if (!optionalTag.isPresent())
-						tagEntity = new TagEntity(0, tag.getName());
+						tagEntity = em.merge(new TagEntity(0, tag.getName()));
 				}
 				petEntity.getTagEntities().add(tagEntity);
 			}
 		}
-		// Resolve PhotoUrls
-		petEntity.setPetPhotosEntities(new HashSet<>());
+		for (PetPhotosEntity petPhotoEntity : petEntity.getPetPhotosEntities())
+			em.remove(petPhotoEntity);
+		petEntity.getPetPhotosEntities().removeIf((p) -> true);
 		for (String photoUrl : petUpdate.getPhotoUrls())
-			petEntity.getPetPhotosEntities().add(new PetPhotosEntity(petEntity, photoUrl));
+			petEntity.getPetPhotosEntities().add(em.merge(new PetPhotosEntity(petEntity, photoUrl)));
 
 	}
 

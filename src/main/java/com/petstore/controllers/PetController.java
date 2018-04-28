@@ -2,7 +2,6 @@ package com.petstore.controllers;
 
 import java.text.MessageFormat;
 import java.util.List;
-import java.util.Optional;
 
 import javax.validation.Valid;
 
@@ -25,6 +24,7 @@ import com.petstore.services.PetService;
  * PetController offers following REST operation on Pet resource<br>
  * GET /pets <br>
  * GET /pets/{id} <br>
+ * PUT /pets/{id} <br>
  * POST /pets <br>
  * DELETE /pets/{id} <br>
  * 
@@ -32,7 +32,8 @@ import com.petstore.services.PetService;
  *
  */
 @RestController
-@CrossOrigin(allowCredentials = "true", allowedHeaders = "*", origins = "*")
+@CrossOrigin(methods = { RequestMethod.POST, RequestMethod.GET, RequestMethod.PUT, RequestMethod.DELETE,
+		RequestMethod.HEAD, RequestMethod.OPTIONS }, allowCredentials = "true", allowedHeaders = "*")
 public class PetController {
 
 	@Autowired
@@ -47,21 +48,19 @@ public class PetController {
 
 	@RequestMapping(method = { RequestMethod.GET }, path = "/pets/{id}")
 	public ApiResponse<PetEntity> getPet(@PathVariable("id") long petId) {
-		Optional<PetEntity> optionalPet = petService.findById(petId);
-		if (!optionalPet.isPresent())
+		PetEntity petEntity = petService.findById(petId);
+		if (petEntity == null)
 			throw new HttpClientErrorException(HttpStatus.NOT_FOUND,
 					MessageFormat.format("Pet with id {0} does not belong to the store", petId));
 
-		PetEntity pet = optionalPet.get();
-		return new ApiResponse<PetEntity>(HttpStatus.OK,
-				MessageFormat.format("Pet[ID:{0}] found in the store.", pet.getPetId(), pet.getPetName()), pet);
+		return new ApiResponse<PetEntity>(HttpStatus.OK, MessageFormat.format("Pet[ID:{0}] found in the store.", petId),
+				petEntity);
 	}
 
 	@RequestMapping(method = { RequestMethod.PUT }, path = "/pets/{id}")
 	public ApiResponse<PetEntity> editPet(@PathVariable("id") long petId, @RequestBody @Valid Pet petUpdate) {
-		return new ApiResponse<PetEntity>(HttpStatus.OK,
-				MessageFormat.format("Pet[ID:{0}, Name:{1}] successfully inserted into the store.", petUpdate.getId(),
-						petUpdate.getName()),
+		return new ApiResponse<PetEntity>(HttpStatus.OK, MessageFormat
+				.format("Pet[ID:{0}, Name:{1}] successfully updated.", petUpdate.getId(), petUpdate.getName()),
 				petService.update(petId, petUpdate));
 	}
 
@@ -75,12 +74,6 @@ public class PetController {
 
 	@RequestMapping(path = "/pets/{id}", method = { RequestMethod.DELETE })
 	public ApiResponse<Void> deletePet(@PathVariable("id") long petId) {
-		Optional<PetEntity> pet = petService.findById(petId);
-
-		if (!pet.isPresent())
-			throw new HttpClientErrorException(HttpStatus.NOT_FOUND,
-					MessageFormat.format("Pet with id {0} does not belong to the store", petId));
-
 		petService.deleteById(petId);
 		return new ApiResponse<Void>(HttpStatus.OK,
 				MessageFormat.format("Pet[ID:{0}] successfully removed from the store.", petId));
