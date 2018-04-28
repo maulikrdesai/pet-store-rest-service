@@ -4,28 +4,28 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 public class Tag {
-	private int id;
+	private long id;
 	private String name;
 
 	public Tag() {
 		super();
 	}
 
-	public Tag(int id, String name) {
+	public Tag(long id, String name) {
 		super();
 		this.id = id;
 		this.name = name;
 	}
 
-	@NotNull
-	public int getId() {
+	public long getId() {
 		return this.id;
 	}
 
-	public void setId(int id) {
+	public void setId(long id) {
 		this.id = id;
 	}
 
+	@NotNull
 	@Size(min = 1, max = 150)
 	public String getName() {
 		return this.name;

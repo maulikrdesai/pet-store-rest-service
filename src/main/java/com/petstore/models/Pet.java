@@ -70,6 +70,8 @@ public class Pet {
 		this.category = category;
 	}
 
+	@NotNull
+	@Size(min = 1, max = 10)
 	public List<String> getPhotoUrls() {
 		return photoUrls;
 	}

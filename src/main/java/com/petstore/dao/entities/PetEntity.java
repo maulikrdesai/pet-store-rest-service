@@ -26,9 +26,9 @@ public class PetEntity extends com.petstore.dao.entities.AbstractPetEntity imple
 		AVAILABLE, PENDING, SOLD;
 
 		public static PetStatus resolveStatus(String status) {
-			PetStatus resolvedStatus = PetStatus.valueOf(status);
-			if (resolvedStatus != null)
-				return resolvedStatus;
+			for (PetStatus petStatus : PetStatus.values())
+				if (petStatus.name().equalsIgnoreCase(status))
+					return petStatus;
 			return PetStatus.AVAILABLE;
 		}
 	}

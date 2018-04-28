@@ -16,13 +16,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpClientErrorException;
 
-import com.petstore.dao.entities.CategoryEntity;
 import com.petstore.dao.entities.PetEntity;
-import com.petstore.dao.entities.PetEntity.PetStatus;
-import com.petstore.dao.repository.CategoryRepository;
-import com.petstore.dao.repository.PetRepository;
 import com.petstore.models.ApiResponse;
 import com.petstore.models.Pet;
+import com.petstore.services.PetService;
 
 /***
  * PetController offers following REST operation on Pet resource<br>
@@ -39,57 +36,52 @@ import com.petstore.models.Pet;
 public class PetController {
 
 	@Autowired
-	private PetRepository petRepo;
-	@Autowired
-	private CategoryRepository categoryRepo;
+	private PetService petService;
 
 	@RequestMapping(method = { RequestMethod.GET }, path = "/pets")
 	public ApiResponse<List<PetEntity>> getPets() {
-		List<PetEntity> petsInStore = petRepo.findAll();
+		List<PetEntity> petsInStore = petService.findAll();
 		return new ApiResponse<List<PetEntity>>(HttpStatus.OK,
 				MessageFormat.format("{0} pet(s) found.", petsInStore.size()), petsInStore);
 	}
 
 	@RequestMapping(method = { RequestMethod.GET }, path = "/pets/{id}")
 	public ApiResponse<PetEntity> getPet(@PathVariable("id") long petId) {
-		Optional<PetEntity> pet = petRepo.findById(petId);
-		if (!pet.isPresent())
+		Optional<PetEntity> optionalPet = petService.findById(petId);
+		if (!optionalPet.isPresent())
 			throw new HttpClientErrorException(HttpStatus.NOT_FOUND,
 					MessageFormat.format("Pet with id {0} does not belong to the store", petId));
 
+		PetEntity pet = optionalPet.get();
 		return new ApiResponse<PetEntity>(HttpStatus.OK,
-				MessageFormat.format("Pet[ID:{0}] found in the store.", pet.get().getPetId(), pet.get().getPetName()),
-				pet.get());
+				MessageFormat.format("Pet[ID:{0}] found in the store.", pet.getPetId(), pet.getPetName()), pet);
+	}
+
+	@RequestMapping(method = { RequestMethod.PUT }, path = "/pets/{id}")
+	public ApiResponse<PetEntity> editPet(@PathVariable("id") long petId, @RequestBody @Valid Pet petUpdate) {
+		return new ApiResponse<PetEntity>(HttpStatus.OK,
+				MessageFormat.format("Pet[ID:{0}, Name:{1}] successfully inserted into the store.", petUpdate.getId(),
+						petUpdate.getName()),
+				petService.update(petId, petUpdate));
 	}
 
 	@RequestMapping(path = "/pets", method = { RequestMethod.POST })
-	public ApiResponse<Void> postPet(@Valid @RequestBody Pet newPet) {
-
-		CategoryEntity categoryEntity = null;
-		if (newPet.getCategory() != null && newPet.getCategory().getId() > 0) {
-			Optional<CategoryEntity> optionalCategory = categoryRepo.findById(newPet.getCategory().getId());
-			if (!optionalCategory.isPresent())
-				throw new HttpClientErrorException(HttpStatus.NOT_FOUND,
-						MessageFormat.format("Category[ID:{0}, Name:{1}] does not belong to the store",
-								newPet.getCategory().getId(), newPet.getCategory().getName()));
-		}
-
-		PetEntity newPetEntity = new PetEntity(newPet.getName(), PetStatus.resolveStatus(newPet.getStatus()));
-		newPetEntity.setCategoryEntity(categoryEntity);
-		petRepo.save(newPetEntity);
-		return new ApiResponse<Void>(HttpStatus.OK, MessageFormat.format(
-				"Pet[ID:{0}, Name:{1}] successfully inserted into the store.", newPet.getId(), newPet.getName()));
+	public ApiResponse<PetEntity> postPet(@RequestBody @Valid Pet newPet) {
+		return new ApiResponse<PetEntity>(HttpStatus.OK,
+				MessageFormat.format("Pet[ID:{0}, Name:{1}] successfully inserted into the store.", newPet.getId(),
+						newPet.getName()),
+				petService.save(newPet));
 	}
 
 	@RequestMapping(path = "/pets/{id}", method = { RequestMethod.DELETE })
 	public ApiResponse<Void> deletePet(@PathVariable("id") long petId) {
-		Optional<PetEntity> pet = petRepo.findById(petId);
+		Optional<PetEntity> pet = petService.findById(petId);
 
 		if (!pet.isPresent())
 			throw new HttpClientErrorException(HttpStatus.NOT_FOUND,
 					MessageFormat.format("Pet with id {0} does not belong to the store", petId));
 
-		petRepo.deleteById(petId);
+		petService.deleteById(petId);
 		return new ApiResponse<Void>(HttpStatus.OK,
 				MessageFormat.format("Pet[ID:{0}] successfully removed from the store.", petId));
 	}
