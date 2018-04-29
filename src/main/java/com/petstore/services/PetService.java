@@ -2,7 +2,6 @@ package com.petstore.services;
 
 import java.text.MessageFormat;
 import java.util.List;
-import java.util.Optional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -16,9 +15,7 @@ import com.petstore.dao.entities.PetEntity;
 import com.petstore.dao.entities.PetEntity.PetStatus;
 import com.petstore.dao.entities.PetPhotosEntity;
 import com.petstore.dao.entities.TagEntity;
-import com.petstore.dao.repository.CategoryRepository;
 import com.petstore.dao.repository.PetRepository;
-import com.petstore.dao.repository.TagRepository;
 import com.petstore.models.Pet;
 import com.petstore.models.Tag;
 
@@ -28,10 +25,6 @@ public class PetService {
 
 	@PersistenceContext
 	EntityManager em;
-	@Autowired
-	CategoryRepository categoryRepo;
-	@Autowired
-	TagRepository tagRepo;
 	@Autowired
 	PetRepository petRepo;
 
@@ -80,30 +73,22 @@ public class PetService {
 		// Resolve Category
 		CategoryEntity categoryEntity = null;
 		if (petUpdate.getCategory() != null && petUpdate.getCategory().getId() > 0) {
-			Optional<CategoryEntity> optionalCategory = categoryRepo.findById(petUpdate.getCategory().getId());
-			if (!optionalCategory.isPresent())
+			categoryEntity = em.find(CategoryEntity.class, petUpdate.getCategory().getId());
+			if (categoryEntity == null)
 				categoryEntity = em.merge(new CategoryEntity(petUpdate.getCategory().getName()));
 		}
 		petEntity.setCategoryEntity(categoryEntity);
-
-		for (TagEntity tagEntity : petEntity.getTagEntities())
-			em.remove(tagEntity);
 		petEntity.getTagEntities().removeIf((p) -> true);
+		petEntity.getPetPhotosEntities().removeIf((p) -> true);
 
 		if (petUpdate.getTags() != null) {
 			for (Tag tag : petUpdate.getTags()) {
-				TagEntity tagEntity = null;
-				if (petUpdate.getCategory() != null && petUpdate.getCategory().getId() > 0) {
-					Optional<TagEntity> optionalTag = tagRepo.findById(tag.getId());
-					if (!optionalTag.isPresent())
-						tagEntity = em.merge(new TagEntity(0, tag.getName()));
-				}
+				TagEntity tagEntity = em.find(TagEntity.class, tag.getId());
+				if (tagEntity == null)
+					tagEntity = em.merge(new TagEntity(0, tag.getName()));
 				petEntity.getTagEntities().add(tagEntity);
 			}
 		}
-		for (PetPhotosEntity petPhotoEntity : petEntity.getPetPhotosEntities())
-			em.remove(petPhotoEntity);
-		petEntity.getPetPhotosEntities().removeIf((p) -> true);
 		for (String photoUrl : petUpdate.getPhotoUrls())
 			petEntity.getPetPhotosEntities().add(em.merge(new PetPhotosEntity(petEntity, photoUrl)));
 
