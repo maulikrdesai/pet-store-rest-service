@@ -78,9 +78,8 @@ public class PetService {
 				categoryEntity = em.merge(new CategoryEntity(petUpdate.getCategory().getName()));
 		}
 		petEntity.setCategoryEntity(categoryEntity);
+		
 		petEntity.getTagEntities().removeIf((p) -> true);
-		petEntity.getPetPhotosEntities().removeIf((p) -> true);
-
 		if (petUpdate.getTags() != null) {
 			for (Tag tag : petUpdate.getTags()) {
 				TagEntity tagEntity = em.find(TagEntity.class, tag.getId());
@@ -89,6 +88,10 @@ public class PetService {
 				petEntity.getTagEntities().add(tagEntity);
 			}
 		}
+
+		for (PetPhotosEntity petPhotoEntity : petEntity.getPetPhotosEntities())
+			em.remove(petPhotoEntity);
+		petEntity.getPetPhotosEntities().removeIf((p) -> true);
 		for (String photoUrl : petUpdate.getPhotoUrls())
 			petEntity.getPetPhotosEntities().add(em.merge(new PetPhotosEntity(petEntity, photoUrl)));
 
