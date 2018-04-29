@@ -18,7 +18,7 @@ CREATE TABLE `pets` (
   ,`status` VARCHAR(50) NOT NULL DEFAULT 'AVAILABLE'
   ,PRIMARY KEY (`pet_id`)
   ,KEY `FK_petsCategory` (`category_id`)
-  ,CONSTRAINT `FK_petsCategory` FOREIGN KEY (`category_id`) REFERENCES `categories` (`category_id`)
+  ,CONSTRAINT `FK_petsCategory` FOREIGN KEY (`category_id`) REFERENCES `categories` (`category_id`)ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `pettags` (
@@ -27,8 +27,8 @@ CREATE TABLE `pettags` (
   ,PRIMARY KEY (`pet_id`,`tag_id`)
   ,KEY `FK_PetsTag` (`tag_id`)
   ,KEY `FK_TagsPet` (`pet_id`)
-  ,CONSTRAINT `FK_PetsTag` FOREIGN KEY (`tag_id`) REFERENCES `tags` (`tag_id`)
-  ,CONSTRAINT `FK_TagsPet` FOREIGN KEY (`pet_id`) REFERENCES `pets` (`pet_id`)
+  ,CONSTRAINT `FK_PetsTag` FOREIGN KEY (`tag_id`) REFERENCES `tags` (`tag_id`) ON DELETE CASCADE ON UPDATE CASCADE
+  ,CONSTRAINT `FK_TagsPet` FOREIGN KEY (`pet_id`) REFERENCES `pets` (`pet_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `petPhotos` (
@@ -37,5 +37,5 @@ CREATE TABLE `petPhotos` (
   ,`photo_url`  VARCHAR(4000) NOT NULL
   ,PRIMARY KEY (`pet_photo_id`)
   ,KEY `FK_photosPet` (`pet_id`)
-  ,CONSTRAINT `FK_photosPet` FOREIGN KEY (`pet_id`) REFERENCES `pets` (`pet_id`)
+  ,CONSTRAINT `FK_photosPet` FOREIGN KEY (`pet_id`) REFERENCES `pets` (`pet_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
