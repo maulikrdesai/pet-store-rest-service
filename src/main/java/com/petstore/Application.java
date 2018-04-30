@@ -2,6 +2,8 @@ package com.petstore;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -11,6 +13,8 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 
 @EnableWebMvc
 @SpringBootApplication
+@CrossOrigin(methods = { RequestMethod.POST, RequestMethod.GET, RequestMethod.PUT, RequestMethod.DELETE,
+		RequestMethod.HEAD, RequestMethod.OPTIONS }, allowCredentials = "true", allowedHeaders = "*")
 public class Application {
 
 	public static final ObjectMapper objectMapper = new ObjectMapper();
