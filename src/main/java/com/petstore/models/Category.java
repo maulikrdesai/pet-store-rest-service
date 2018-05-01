@@ -8,24 +8,24 @@ import javax.validation.constraints.Size;
 public class Category implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	private Long id;
+	private long id;
 	private String name;
 
 	public Category() {
 		super();
 	}
 
-	public Category(Long id, String name) {
+	public Category(long id, String name) {
 		super();
 		this.id = id;
 		this.name = name;
 	}
 
-	public Long getId() {
+	public long getId() {
 		return id;
 	}
 
-	public void setId(Long id) {
+	public void setId(long id) {
 		this.id = id;
 	}
 
