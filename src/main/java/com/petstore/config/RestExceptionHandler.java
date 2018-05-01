@@ -1,4 +1,4 @@
-package com.petstore;
+package com.petstore.config;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,14 +31,15 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 		return new ResponseEntity<Object>(
 				new ApiResponse<Void>(resolvedStatus, ExceptionUtils.buildExceptionMessage(ex)), resolvedStatus);
 	}
-	
-	protected ResponseEntity<Object> handleExceptionInternal(Exception ex, @Nullable Object body,
-			HttpHeaders headers, HttpStatus status, WebRequest request) {
+
+	protected ResponseEntity<Object> handleExceptionInternal(Exception ex, @Nullable Object body, HttpHeaders headers,
+			HttpStatus status, WebRequest request) {
 
 		if (HttpStatus.INTERNAL_SERVER_ERROR.equals(status)) {
 			request.setAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE, ex, WebRequest.SCOPE_REQUEST);
 		}
-		return new ResponseEntity<Object>(new ApiResponse<Void>(status, ExceptionUtils.buildExceptionMessage(ex)), headers, status);
+		return new ResponseEntity<Object>(new ApiResponse<Void>(status, ExceptionUtils.buildExceptionMessage(ex)),
+				status);
 	}
 
 	@Override

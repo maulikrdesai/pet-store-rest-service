@@ -28,6 +28,8 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.petstore.servlet.exception.AuthenticationFailedException;
+import com.petstore.servlet.exception.AuthenticationRequiredException;
 
 /***
  * This class can be used to build REST response for an exception
@@ -53,6 +55,8 @@ public class ExceptionUtils {
 				|| ex instanceof ServletRequestBindingException || ex instanceof TypeMismatchException
 				|| ex instanceof HttpMessageNotReadableException)
 			return HttpStatus.BAD_REQUEST;
+		if (ex instanceof AuthenticationFailedException | ex instanceof AuthenticationRequiredException)
+			return HttpStatus.UNAUTHORIZED;
 		// JSON generation is not bad request it is internal server error
 		if (ex instanceof JsonProcessingException && !(ex instanceof JsonGenerationException))
 			return HttpStatus.BAD_REQUEST;
