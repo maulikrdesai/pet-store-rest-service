@@ -1,8 +1,6 @@
 package com.petstore.servlet.exception;
 
-import javax.servlet.ServletException;
-
-public class AuthenticationFailedException extends ServletException {
+public class AuthenticationFailedException extends RuntimeException	 {
 
 	private static final long serialVersionUID = 1L;
 

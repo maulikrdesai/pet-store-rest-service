@@ -23,9 +23,9 @@ import com.petstore.models.ApiResponse;
 import com.petstore.servlet.exception.AuthenticationRequiredException;
 import com.petstore.utils.ExceptionUtils;
 
-public class BasicSecurityFilter extends GenericFilterBean {
+public class UserSecurityFilter extends GenericFilterBean {
 
-	private static Log logger = LogFactory.getLog(BasicSecurityFilter.class);
+	private static Log logger = LogFactory.getLog(UserSecurityFilter.class);
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain)
@@ -40,20 +40,14 @@ public class BasicSecurityFilter extends GenericFilterBean {
 			if (httpRequest.getMethod().equalsIgnoreCase("OPTIONS"))
 				return;
 			// Pass-thru for logout
-			if (httpRequest.getRequestURI().startsWith(httpRequest.getContextPath() + "/logout")) {
-				filterChain.doFilter(httpRequest, httpResponse);
-				return;
-			}
-			// Everything is Authorized now
-			else {
-				BasicSecureRequest secureRequest = new BasicSecureRequest(httpRequest);
-				if (secureRequest.isAlreadyLoggedIn())
-					filterChain.doFilter(secureRequest, response);
-				// Perform Login
-				secureRequest.doLogin();
-				// Chain Further
-				filterChain.doFilter(secureRequest, httpResponse);
-			}
+			boolean logoutReq = httpRequest.getRequestURI().startsWith("/logout");
+			boolean loginReq = httpRequest.getRequestURI().startsWith("/login");
+			BearerSecureRequest secureRequest = new BearerSecureRequest(httpRequest);
+
+			if (!logoutReq && !loginReq && !secureRequest.isAlreadyLoggedIn())
+				throw new AuthenticationRequiredException("Please perform login using /login");
+
+			filterChain.doFilter(secureRequest, response);
 		} catch (Exception e) {
 			HttpStatus httpStatus = ExceptionUtils.resolveStatus(e);
 			String message = ExceptionUtils.buildExceptionMessage(e);
@@ -62,10 +56,8 @@ public class BasicSecurityFilter extends GenericFilterBean {
 			httpResponse.reset();
 			addCorsHeaders(httpResponse);
 			httpResponse.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_UTF8_VALUE);
-			if (e instanceof AuthenticationRequiredException) {
-				httpResponse.addHeader(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, HttpHeaders.WWW_AUTHENTICATE);
-				httpResponse.addHeader(HttpHeaders.WWW_AUTHENTICATE, "Basic realm=\"Realm\"");
-			}
+			if (e instanceof AuthenticationRequiredException)
+				httpResponse.addHeader(HttpHeaders.WWW_AUTHENTICATE, "Bearer realm=\"Realm\"");
 
 			httpResponse.setStatus(httpStatus.value());
 			Writer writer = httpResponse.getWriter();
@@ -79,11 +71,12 @@ public class BasicSecurityFilter extends GenericFilterBean {
 		httpResponse.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
 		httpResponse.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS, "*");
 		httpResponse.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS, "*");
+		httpResponse.addHeader(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, HttpHeaders.WWW_AUTHENTICATE);
 	}
 
 	@Override
 	public void destroy() {
-		logger.info(MessageFormat.format("{0} destoryed", BasicSecurityFilter.class.getName()));
+		logger.info(MessageFormat.format("{0} destoryed", UserSecurityFilter.class.getName()));
 	}
 
 }
