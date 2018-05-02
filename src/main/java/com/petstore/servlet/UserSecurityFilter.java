@@ -42,9 +42,11 @@ public class UserSecurityFilter extends GenericFilterBean {
 			// Pass-thru for logout
 			boolean logoutReq = httpRequest.getRequestURI().startsWith("/logout");
 			boolean loginReq = httpRequest.getRequestURI().startsWith("/login");
+			boolean getPets = httpRequest.getRequestURI().startsWith("/pets")
+					&& httpRequest.getMethod().equalsIgnoreCase("GEt");
 			BearerSecureRequest secureRequest = new BearerSecureRequest(httpRequest);
 
-			if (!logoutReq && !loginReq && !secureRequest.isAlreadyLoggedIn())
+			if (!getPets && !logoutReq && !loginReq && !secureRequest.isAlreadyLoggedIn())
 				throw new AuthenticationRequiredException("Please perform login using /login");
 
 			filterChain.doFilter(secureRequest, response);
